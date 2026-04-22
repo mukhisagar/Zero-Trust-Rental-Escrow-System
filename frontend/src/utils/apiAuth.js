@@ -33,6 +33,36 @@ export const createProperty = async (token, property) => {
   return response.json();
 };
 
+export const getEscrows = async (token) => {
+  const response = await fetch(`${API_BASE}/escrows`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!response.ok) throw new Error("Failed to fetch escrows");
+  return response.json();
+};
+
+export const confirmEscrow = async (token, escrowId) => {
+  const response = await fetch(`${API_BASE}/escrows/${escrowId}/confirm`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to confirm escrow");
+  return response.json();
+};
+
+export const releaseEscrow = async (token, escrowId) => {
+  const response = await fetch(`${API_BASE}/escrows/${escrowId}/release`, {
+    method: "PATCH",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  if (!response.ok) throw new Error("Failed to release escrow");
+  return response.json();
+};
+
 export const createEscrow = async (token, escrow) => {
   const response = await fetch(`${API_BASE}/escrows`, {
     method: "POST",

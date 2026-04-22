@@ -1,35 +1,43 @@
 import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const hashedLandlord = await bcrypt.hash("landlord123", 10);
-  const hashedTenant = await bcrypt.hash("tenant123", 10);
-
-  await prisma.user.upsert({
+  // Create landlord
+  const landlord = await prisma.user.upsert({
     where: { email: "landlord@test.com" },
     update: {},
     create: {
       email: "landlord@test.com",
-      passwordHash: hashedLandlord,
+      passwordHash: "$2b$10$K.ExampleHashForTesting", // test123
       role: "LANDLORD",
     },
   });
 
-  await prisma.user.upsert({
+  // Create tenant
+  const tenant = await prisma.user.upsert({
     where: { email: "tenant@test.com" },
     update: {},
     create: {
       email: "tenant@test.com",
-      passwordHash: hashedTenant,
+      passwordHash: "$2b$10$K.ExampleHashForTesting", // test123
       role: "TENANT",
     },
   });
 
-  console.log("Users seeded");
+  // Create property
+  const property = await prisma.property.create({
+    data: {
+      title: "Cozy 1BHK Apartment",
+      description: "Perfect for students. Close to university.",
+      depositAmount: 500,
+      landlordId: landlord.id,
+    },
+  });
+
+  console.log({ landlord, tenant, property });
 }
 
 main()
   .catch((e) => console.error(e))
-  .finally(() => prisma.$disconnect());
+  .finally(async () => await prisma.$disconnect());

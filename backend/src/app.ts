@@ -66,6 +66,85 @@ app.post("/api/escrows", requireAuth, async (req: AuthRequest, res) => {
   res.json(escrow);
 });
 
+app.get("/api/escrows", requireAuth, async (req: AuthRequest, res) => {
+  const escrows = await prisma.escrow.findMany({
+    where: {
+      OR: [
+        { tenantId: req.user?.id },
+        { property: { landlordId: req.user?.id } },
+      ],
+    },
+    include: {
+      property: {
+        include: { landlord: { select: { email: true } } },
+      },
+      tenant: { select: { email: true } },
+    },
+  });
+  res.json(escrows);
+});
+
+app.patch(
+  "/api/escrows/:id/confirm",
+  requireAuth,
+  async (req: AuthRequest, res) => {
+    const { id } = req.params;
+    if (!req.user) return res.status(401).json({ error: "No user" });
+
+    // Get current state
+    const currentEscrow = await prisma.escrow.findUnique({
+      where: { id },
+      select: {
+        landlordConfirmed: true,
+        tenantConfirmed: true,
+      },
+    });
+
+    if (!currentEscrow)
+      return res.status(404).json({ error: "Escrow not found" });
+
+    const updateData: any = {};
+
+    if (req.user.role === "LANDLORD") {
+      updateData.landlordConfirmed = true;
+      updateData.status = currentEscrow.tenantConfirmed
+        ? "READY_TO_RELEASE"
+        : "LANDLORD_CONFIRMED";
+    } else if (req.user.role === "TENANT") {
+      updateData.tenantConfirmed = true;
+      updateData.status = currentEscrow.landlordConfirmed
+        ? "READY_TO_RELEASE"
+        : "TENANT_CONFIRMED";
+    }
+
+    const escrow = await prisma.escrow.update({
+      where: { id },
+      data: updateData,
+      include: { property: true },
+    });
+
+    res.json(escrow);
+  },
+);
+
+app.patch(
+  "/api/escrows/:id/release",
+  requireAuth,
+  requireRole(["LANDLORD"]),
+  async (req: AuthRequest, res) => {
+    const { id } = req.params;
+    const escrow = await prisma.escrow.update({
+      where: { id },
+      data: {
+        status: "RELEASED",
+        released: true,
+      },
+      include: { property: true },
+    });
+    res.json(escrow);
+  },
+);
+
 // Listen removed - in server.ts
 
 export default app;

@@ -1,14 +1,20 @@
-# Rental Escrow DApp - Task Progress
+# Rental Escrow - Complete Flow Plan
 
-## Approved Plan Steps
+## Current Status
 
-- [x] Smart contract `RentalEscrow.sol` created and verified.
-- [ ] Setup frontend React structure (Vite + Tailwind).
-- [ ] Create core components: ConnectWallet, LandlordDashboard, TenantView.
-- [ ] Implement contract ABI/utils for ethers.js integration.
-- [ ] Add wallet connection (MetaMask) and on-chain interactions.
-- [ ] Style with Tailwind (real estate theme).
-- [ ] Test locally: Deploy contract to testnet (e.g., Sepolia), run frontend.
-- [ ] Final demo command.
+✅ Backend: Prisma schema, auth, basic properties/escrows
+✅ Frontend: Login, dashboards, property list/create, escrow creation
+❌ Missing: Escrow status, confirm/release, blockchain integration
 
-**Next: Install deps and create components.**
+## Breakdown Steps
+
+1. [x] Backend: Add GET/PATCH escrow endpoints
+2. [x] Backend: Seed test data
+
+3. [ ] Backend: Start server (`npm run dev`)
+4. [ ] Frontend: Add escrow list + confirm UI in dashboards
+5. [ ] Deploy contract to Sepolia (Remix)
+6. [ ] Frontend: Blockchain deposit/release flow
+7. [ ] Test full cycle
+
+**Next Step:** Backend escrow endpoints → `app.ts`
